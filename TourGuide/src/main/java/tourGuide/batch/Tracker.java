@@ -37,15 +37,7 @@ public class Tracker extends Thread {
                 break;
             }
 
-            List<User> users = tourGuideService.getAllUsers();
-
-            log.debug("Begin Tracker. Tracking " + users.size() + " users.");
-            trackerConfigurationParameters.getStopWatch().start();
-
-            users.parallelStream().forEach(tourGuideService::trackUserLocation);
-
-            trackerConfigurationParameters.getStopWatch().stop();
-            log.debug("Tracker Time Elapsed: " + trackerConfigurationParameters.getStopWatch().getTime() + " ms.");
+            trackOnce();
 
             trackerConfigurationParameters.getStopWatch().reset();
 
@@ -58,8 +50,17 @@ public class Tracker extends Thread {
         }
     }
 
-    // TODO : move to TestHelper class ?
-    public void stopTracking() {
-        executorService.shutdownNow();
+    public void trackOnce() {
+        List<User> users = tourGuideService.getAllUsers();
+
+        log.debug("Begin Tracker. Tracking " + users.size() + " users.");
+        trackerConfigurationParameters.getStopWatch().start();
+
+        users.parallelStream().forEach(tourGuideService::trackUserLocation);
+
+        trackerConfigurationParameters.getStopWatch().stop();
+        log.debug("Tracker Time Elapsed: " + trackerConfigurationParameters.getStopWatch().getTime() + " ms.");
+
+
     }
 }
