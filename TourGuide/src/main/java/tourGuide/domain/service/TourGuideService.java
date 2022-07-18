@@ -12,8 +12,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -27,27 +26,25 @@ import tourGuide.domain.model.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
+@Slf4j
 @Service
 public class TourGuideService {
-	private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
 	private final GpsUtil gpsUtil;
 	private final RewardsService rewardsService;
-	private final TripPricer tripPricer = new TripPricer();
-	public final Tracker tracker;
+	private final TripPricer tripPricer;
 	boolean testMode = true;
 	
-	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
+	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, TripPricer tripPricer) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsService = rewardsService;
-		
+		this.tripPricer = tripPricer;
+
 		if(testMode) {
-			logger.info("TestMode enabled");
-			logger.debug("Initializing users");
+			log.info("TestMode enabled");
+			log.debug("Initializing users");
 			initializeInternalUsers();
-			logger.debug("Finished initializing users");
+			log.debug("Finished initializing users");
 		}
-		tracker = new Tracker(this);
-		addShutDownHook();
 	}
 	
 	public List<UserReward> getUserRewards(User user) {
@@ -101,14 +98,6 @@ public class TourGuideService {
 		return nearbyAttractions;
 	}
 	
-	private void addShutDownHook() {
-		Runtime.getRuntime().addShutdownHook(new Thread() { 
-		      public void run() {
-		        tracker.stopTracking();
-		      } 
-		    }); 
-	}
-	
 	/**********************************************************************************
 	 * 
 	 * Methods Below: For Internal Testing
@@ -127,7 +116,7 @@ public class TourGuideService {
 			
 			internalUserMap.put(userName, user);
 		});
-		logger.debug("Created " + InternalTestHelper.getInternalUserNumber() + " internal test users.");
+		log.debug("Created " + InternalTestHelper.getInternalUserNumber() + " internal test users.");
 	}
 	
 	private void generateUserLocationHistory(User user) {
