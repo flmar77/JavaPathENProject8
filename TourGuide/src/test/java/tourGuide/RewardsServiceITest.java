@@ -4,8 +4,10 @@ import static org.junit.Assert.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -20,6 +22,11 @@ import tourGuide.domain.model.User;
 import tourGuide.domain.model.UserReward;
 
 public class RewardsServiceITest {
+
+	@Before
+	public void setUpAllTests() {
+		Locale.setDefault(Locale.US);
+	}
 
 	@Test
 	public void userGetRewards() {
