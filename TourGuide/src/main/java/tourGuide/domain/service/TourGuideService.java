@@ -22,7 +22,6 @@ public class TourGuideService {
     private final TripPricer tripPricer;
     private final TourGuideFakeRepo tourGuideFakeRepo;
 
-    private final boolean testMode = true;
     private static final String tripPricerApiKey = "test-server-api-key";
 
     public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService, TripPricer tripPricer, TourGuideFakeRepo tourGuideFakeRepo) {
@@ -30,11 +29,6 @@ public class TourGuideService {
         this.rewardsService = rewardsService;
         this.tripPricer = tripPricer;
         this.tourGuideFakeRepo = tourGuideFakeRepo;
-
-        if (testMode) {
-            log.info("TestMode enabled");
-            this.tourGuideFakeRepo.initializeInternalUsers(100);
-        }
     }
 
     public List<UserReward> getUserRewards(User user) {

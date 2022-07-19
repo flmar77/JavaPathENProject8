@@ -19,7 +19,7 @@ public class Tracker {
         this.tourGuideService = tourGuideService;
     }
 
-    public long trackOnce() {
+    public long trackAllUsers() {
         long watchTime;
         List<User> users = tourGuideService.getAllUsers();
         log.debug("Begin Tracker. Tracking " + users.size() + " users.");

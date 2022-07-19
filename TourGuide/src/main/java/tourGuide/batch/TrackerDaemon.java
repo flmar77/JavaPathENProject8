@@ -24,7 +24,7 @@ public class TrackerDaemon extends Thread {
                 break;
             }
 
-            long watchTime = tracker.trackOnce();
+            long watchTime = tracker.trackAllUsers();
             log.debug("Tracker Time Elapsed: " + watchTime + " ms.");
 
             try {
