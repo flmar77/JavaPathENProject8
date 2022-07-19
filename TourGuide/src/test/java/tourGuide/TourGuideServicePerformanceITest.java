@@ -10,7 +10,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
 import tourGuide.batch.Tracker;
-import tourGuide.dal.InternalTestHelper;
+import tourGuide.dal.TourGuideFakeRepo;
 import tourGuide.domain.model.User;
 import tourGuide.domain.service.RewardsService;
 import tourGuide.domain.service.TourGuideService;
@@ -30,14 +30,14 @@ public class TourGuideServicePerformanceITest {
     private final GpsUtil gpsUtil = new GpsUtil();
     private final TripPricer tripPricer = new TripPricer();
     private final RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-    private final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer);
+    private final TourGuideFakeRepo tourGuideFakeRepo = new TourGuideFakeRepo();
+    private final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer, tourGuideFakeRepo);
 
     @Before
     public void setUpAllTests() {
         Locale.setDefault(Locale.US);
         // TODO : Users should be incremented up to 100,000
-        InternalTestHelper.setInternalUserNumber(100);
-        tourGuideService.initializeInternalUsers();
+        tourGuideFakeRepo.initializeInternalUsers(100);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class TourGuideServicePerformanceITest {
         allUsers = tourGuideService.getAllUsers();
         allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-        allUsers.forEach(u -> rewardsService.calculateRewards(u));
+        allUsers.forEach(rewardsService::calculateRewards);
 
         for (User user : allUsers) {
             assertTrue(user.getUserRewards().size() > 0);

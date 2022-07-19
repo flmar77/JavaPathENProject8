@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
+import tourGuide.dal.TourGuideFakeRepo;
 import tourGuide.domain.model.User;
 import tourGuide.domain.service.RewardsService;
 import tourGuide.domain.service.TourGuideService;
@@ -25,7 +26,8 @@ public class TourGuideServiceITest {
     private final GpsUtil gpsUtil = new GpsUtil();
     private final TripPricer tripPricer = new TripPricer();
     private final RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-    private final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer);
+    private final TourGuideFakeRepo tourGuideFakeRepo = new TourGuideFakeRepo();
+    private final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer, tourGuideFakeRepo);
 
     @Before
     public void setUpAllTests() {
