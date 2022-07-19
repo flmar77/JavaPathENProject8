@@ -1,66 +1,36 @@
 package tourGuide.batch;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.StopWatch;
 import org.springframework.stereotype.Service;
 import tourGuide.domain.model.User;
 import tourGuide.domain.service.TourGuideService;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
-public class Tracker extends Thread {
+public class Tracker {
+
     private final TourGuideService tourGuideService;
-    private final ExecutorService executorService;
-    private final TrackerConfigurationParameters trackerConfigurationParameters;
+    private final StopWatch stopWatch = new StopWatch();
 
-    public Tracker(TourGuideService tourGuideService, TrackerConfigurationParameters trackerConfigurationParameters) {
+    public Tracker(TourGuideService tourGuideService) {
         this.tourGuideService = tourGuideService;
-        this.trackerConfigurationParameters = trackerConfigurationParameters;
-        this.executorService = Executors.newSingleThreadExecutor();
     }
 
-    public void startTracker() {
-        log.debug("start tracker");
-        executorService.submit(this);
-    }
-
-    @Override
-    public void run() {
-
-        while (true) {
-            if (Thread.currentThread().isInterrupted()) {
-                log.debug("Tracker stopping");
-                break;
-            }
-
-            trackOnce();
-
-            trackerConfigurationParameters.getStopWatch().reset();
-
-            try {
-                log.debug("Tracker sleeping");
-                TimeUnit.SECONDS.sleep(trackerConfigurationParameters.getTrackingPollingInterval());
-            } catch (InterruptedException e) {
-                break;
-            }
-        }
-    }
-
-    public void trackOnce() {
+    public long trackOnce() {
+        long watchTime;
         List<User> users = tourGuideService.getAllUsers();
-
         log.debug("Begin Tracker. Tracking " + users.size() + " users.");
-        trackerConfigurationParameters.getStopWatch().start();
 
+        stopWatch.start();
         users.parallelStream().forEach(tourGuideService::trackUserLocation);
+        stopWatch.stop();
 
-        trackerConfigurationParameters.getStopWatch().stop();
-        log.debug("Tracker Time Elapsed: " + trackerConfigurationParameters.getStopWatch().getTime() + " ms.");
+        watchTime = stopWatch.getTime();
+        stopWatch.reset();
 
-
+        return watchTime;
     }
 }

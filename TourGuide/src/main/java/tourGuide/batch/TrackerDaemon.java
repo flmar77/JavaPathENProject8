@@ -1,0 +1,40 @@
+package tourGuide.batch;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
+@Service
+public class TrackerDaemon extends Thread {
+
+    private final Tracker tracker;
+
+    public TrackerDaemon(Tracker tracker) {
+        this.tracker = tracker;
+    }
+
+    @Override
+    public void run() {
+
+        while (true) {
+            if (Thread.currentThread().isInterrupted()) {
+                log.debug("Tracker stopping");
+                break;
+            }
+
+            long watchTime = tracker.trackOnce();
+            log.debug("Tracker Time Elapsed: " + watchTime + " ms.");
+
+            try {
+                log.debug("Tracker sleeping");
+                // TODO : use config injection
+                TimeUnit.SECONDS.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+
+}

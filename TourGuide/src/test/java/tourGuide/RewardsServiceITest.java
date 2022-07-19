@@ -3,13 +3,10 @@ package tourGuide;
 import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
-import org.apache.commons.lang3.time.StopWatch;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
-import tourGuide.batch.Tracker;
-import tourGuide.batch.TrackerConfigurationParameters;
 import tourGuide.dal.InternalTestHelper;
 import tourGuide.domain.model.User;
 import tourGuide.domain.model.UserReward;
@@ -27,8 +24,6 @@ import static org.junit.Assert.assertTrue;
 
 public class RewardsServiceITest {
 
-    private final TrackerConfigurationParameters trackerConfigurationParameters = new TrackerConfigurationParameters(1000, new StopWatch());
-
     @Before
     public void setUpAllTests() {
         Locale.setDefault(Locale.US);
@@ -42,7 +37,6 @@ public class RewardsServiceITest {
 
         InternalTestHelper.setInternalUserNumber(0);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer);
-        Tracker tracker = new Tracker(tourGuideService, trackerConfigurationParameters);
 
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         Attraction attraction = gpsUtil.getAttractions().get(0);
@@ -70,7 +64,6 @@ public class RewardsServiceITest {
 
         InternalTestHelper.setInternalUserNumber(1);
         TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer);
-        Tracker tracker = new Tracker(tourGuideService, trackerConfigurationParameters);
 
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
         List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));

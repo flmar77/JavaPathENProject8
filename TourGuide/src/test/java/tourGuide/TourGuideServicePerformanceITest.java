@@ -10,7 +10,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
 import tourGuide.batch.Tracker;
-import tourGuide.batch.TrackerConfigurationParameters;
 import tourGuide.dal.InternalTestHelper;
 import tourGuide.domain.model.User;
 import tourGuide.domain.service.RewardsService;
@@ -28,27 +27,6 @@ import static org.junit.Assert.assertTrue;
 @Slf4j
 public class TourGuideServicePerformanceITest {
 
-    /*
-     * A note on performance improvements:
-     *
-     *     The number of users generated for the high volume tests can be easily adjusted via this method:
-     *
-     *     		InternalTestHelper.setInternalUserNumber(100000);
-     *
-     *
-     *     These tests can be modified to suit new solutions, just as long as the performance metrics
-     *     at the end of the tests remains consistent.
-     *
-     *     These are performance metrics that we are trying to hit:
-     *
-     *     highVolumeTrackLocation: 100,000 users within 15 minutes:
-     *     		assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
-     *
-     *     highVolumeGetRewards: 100,000 users within 20 minutes:
-     *          assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
-     */
-
-    private final TrackerConfigurationParameters trackerConfigurationParameters = new TrackerConfigurationParameters(900000, new StopWatch());
     private final GpsUtil gpsUtil = new GpsUtil();
     private final TripPricer tripPricer = new TripPricer();
     private final RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
@@ -58,19 +36,18 @@ public class TourGuideServicePerformanceITest {
     public void setUpAllTests() {
         Locale.setDefault(Locale.US);
         // TODO : Users should be incremented up to 100,000
-        InternalTestHelper.setInternalUserNumber(100000);
+        InternalTestHelper.setInternalUserNumber(100);
         tourGuideService.initializeInternalUsers();
-        log.debug(String.valueOf(InternalTestHelper.getInternalUserNumber()));
     }
 
     @Test
     public void highVolumeTrackLocation() {
-        Tracker tracker = new Tracker(tourGuideService, trackerConfigurationParameters);
+        Tracker tracker = new Tracker(tourGuideService);
 
-        tracker.trackOnce();
+        long watchTime = tracker.trackOnce();
 
-        System.out.println("highVolumeTrackLocation: Time Elapsed: " + trackerConfigurationParameters.getStopWatch().getTime() + " ms");
-        assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(trackerConfigurationParameters.getStopWatch().getTime()));
+        log.debug("highVolumeTrackLocation: Time Elapsed: " + watchTime + " ms");
+        assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(watchTime));
     }
 
     @Ignore
@@ -78,7 +55,6 @@ public class TourGuideServicePerformanceITest {
     public void highVolumeGetRewards() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        Tracker tracker = new Tracker(tourGuideService, trackerConfigurationParameters);
 
         Attraction attraction = gpsUtil.getAttractions().get(0);
         List<User> allUsers = new ArrayList<>();
