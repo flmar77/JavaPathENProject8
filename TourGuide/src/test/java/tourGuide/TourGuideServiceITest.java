@@ -35,11 +35,11 @@ public class TourGuideServiceITest {
     }
 
     @Test
-    public void getUserLocation() {
+    public void trackUser() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
 
-        assertTrue(visitedLocation.userId.equals(user.getUserId()));
+        assertEquals(user.getUserId(), visitedLocation.userId);
     }
 
     @Test
@@ -50,12 +50,11 @@ public class TourGuideServiceITest {
         tourGuideService.addUser(user);
         tourGuideService.addUser(user2);
 
-        User retrivedUser = tourGuideService.getUser(user.getUserName());
-        User retrivedUser2 = tourGuideService.getUser(user2.getUserName());
+        User retrievedUser = tourGuideService.getUser(user.getUserName());
+        User retrievedUser2 = tourGuideService.getUser(user2.getUserName());
 
-
-        assertEquals(user, retrivedUser);
-        assertEquals(user2, retrivedUser2);
+        assertEquals(user, retrievedUser);
+        assertEquals(user2, retrievedUser2);
     }
 
     @Test
@@ -72,15 +71,7 @@ public class TourGuideServiceITest {
         assertTrue(allUsers.contains(user2));
     }
 
-    @Test
-    public void trackUser() {
-        User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
-
-        assertEquals(user.getUserId(), visitedLocation.userId);
-    }
-
-    @Ignore // Not yet implemented
+    @Ignore // TODO : Not yet implemented
     @Test
     public void getNearbyAttractions() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
@@ -91,7 +82,7 @@ public class TourGuideServiceITest {
         assertEquals(5, attractions.size());
     }
 
-    @Ignore // Not yet implemented
+    @Ignore // TODO : Not yet implemented
     @Test
     public void getTripDeals() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
