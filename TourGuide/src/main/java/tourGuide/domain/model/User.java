@@ -35,7 +35,7 @@ public class User {
     }
 
     public void addUserReward(UserReward userReward) {
-        if (userRewards.stream().filter(r -> !r.attraction.attractionName.equals(userReward.attraction)).count() == 0) {
+        if (userRewards.stream().allMatch(r -> false)) {
             userRewards.add(userReward);
         }
     }

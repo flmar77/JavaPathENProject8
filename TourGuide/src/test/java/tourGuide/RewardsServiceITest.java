@@ -42,7 +42,7 @@ public class RewardsServiceITest {
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
         tourGuideService.trackUserLocation(user);
         List<UserReward> userRewards = user.getUserRewards();
-        assertTrue(userRewards.size() == 1);
+        assertEquals(1, userRewards.size());
     }
 
     @Test

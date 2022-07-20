@@ -50,6 +50,7 @@ public class TourGuideServicePerformanceITest {
 
     @Test
     public void highVolumeCalculateRewards() {
+        // TODO : pourquoi ce test alors que rewardsService::calculateRewards déjà appelé par trackAllUsers() ?
         StopWatch stopWatch = new StopWatch();
         Attraction fakeAttraction = new Attraction("attractionName", "city", "state", 0, 0);
         Date fakeDate = new Date();
