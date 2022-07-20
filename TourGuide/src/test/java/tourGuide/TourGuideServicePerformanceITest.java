@@ -35,7 +35,7 @@ public class TourGuideServicePerformanceITest {
     public static void setUpAllTests() {
         Locale.setDefault(Locale.US);
         // TODO : Users should be incremented up to 100,000
-        tourGuideFakeRepo.initializeInternalUsers(1000);
+        tourGuideFakeRepo.initializeInternalUsers(100);
     }
 
     @Test

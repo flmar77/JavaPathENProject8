@@ -30,6 +30,7 @@ repositories {
 dependencies {
     implementation 'org.projectlombok:lombok:1.18.22'
     implementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+    implementation group: 'org.apache.commons', name: 'commons-collections4', version: '4.4'
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-actuator")
     compile group: 'org.javamoney', name: 'moneta', version: '1.3'

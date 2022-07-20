@@ -4,13 +4,18 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import rewardCentral.RewardCentral;
+import tourGuide.domain.model.NBAAttraction;
 import tourGuide.domain.model.User;
 import tourGuide.domain.model.UserReward;
 
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class RewardsService {
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
@@ -38,7 +43,7 @@ public class RewardsService {
             for (Attraction attraction : attractions) {
                 if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
                     if (nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction.attractionId, user)));
                     }
                 }
             }
@@ -54,8 +59,8 @@ public class RewardsService {
         return !(getDistance(attraction, visitedLocation.location) > proximityBuffer);
     }
 
-    private int getRewardPoints(Attraction attraction, User user) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
+    private int getRewardPoints(UUID attractionId, User user) {
+        return rewardsCentral.getAttractionRewardPoints(attractionId, user.getUserId());
     }
 
     public double getDistance(Location loc1, Location loc2) {
@@ -71,4 +76,21 @@ public class RewardsService {
         return STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
     }
 
+    public List<NBAAttraction> getFiveNearestAttractions(User user, Location userLocation) {
+
+        return gpsUtil.getAttractions().stream()
+                .map(attraction -> {
+                    NBAAttraction nbaAttraction = new NBAAttraction();
+                    Location attractionLocation = new Location(attraction.latitude, attraction.longitude);
+                    nbaAttraction.setId(attraction.attractionId);
+                    nbaAttraction.setName(attraction.attractionName);
+                    nbaAttraction.setLocation(attractionLocation);
+                    nbaAttraction.setDistance(getDistance(userLocation, attractionLocation));
+                    return nbaAttraction;
+                })
+                .sorted()
+                .limit(5)
+                .peek(nbaAttraction -> nbaAttraction.setRewardPoints(getRewardPoints(nbaAttraction.getId(), user)))
+                .collect(Collectors.toList());
+    }
 }

@@ -30,7 +30,7 @@ public class TrackerDaemon extends Thread {
             try {
                 log.debug("Tracker sleeping");
                 // TODO : use config injection
-                TimeUnit.SECONDS.sleep(10);
+                TimeUnit.SECONDS.sleep(60);
             } catch (InterruptedException e) {
                 break;
             }

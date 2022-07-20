@@ -1,17 +1,18 @@
 package tourGuide.domain.service;
 
 import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tourGuide.dal.TourGuideFakeRepo;
+import tourGuide.domain.model.NBAUser;
+import tourGuide.domain.model.NearByAttractions;
 import tourGuide.domain.model.User;
 import tourGuide.domain.model.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -55,8 +56,12 @@ public class TourGuideService {
 
     public List<Provider> getTripDeals(User user) {
         int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
-        List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(), user.getUserPreferences().getNumberOfAdults(),
-                user.getUserPreferences().getNumberOfChildren(), user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
+        List<Provider> providers = tripPricer.getPrice(tripPricerApiKey,
+                user.getUserId(),
+                user.getUserPreferences().getNumberOfAdults(),
+                user.getUserPreferences().getNumberOfChildren(),
+                user.getUserPreferences().getTripDuration(),
+                cumulatativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
     }
@@ -68,13 +73,15 @@ public class TourGuideService {
         return visitedLocation;
     }
 
-    public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-        List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (Attraction attraction : gpsUtil.getAttractions()) {
-            if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-                nearbyAttractions.add(attraction);
-            }
-        }
+    public NearByAttractions getNearByAttractions(String userName) {
+        NearByAttractions nearbyAttractions = new NearByAttractions();
+        User user = getUser(userName);
+        Location userLocation = getUserLocation(user).location;
+
+        nearbyAttractions.setUser(new NBAUser(userLocation));
+
+        nearbyAttractions.setAttractions(rewardsService.getFiveNearestAttractions(user, userLocation));
+
         return nearbyAttractions;
     }
 }
