@@ -3,7 +3,6 @@ package tourGuide;
 import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
 import tourGuide.dal.TourGuideFakeRepo;
@@ -80,14 +79,13 @@ public class TourGuideServiceITest {
 
         assertEquals(5, nearByAttractions.getAttractions().size());
     }
-
-    @Ignore // TODO : Not yet implemented
+    
     @Test
     public void getTripDeals() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
         List<Provider> providers = tourGuideService.getTripDeals(user);
 
-        assertEquals(10, providers.size());
+        assertEquals(5, providers.size());
     }
 }

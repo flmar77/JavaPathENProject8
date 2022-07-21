@@ -34,7 +34,7 @@ public class TourGuideServicePerformanceITest {
     @BeforeClass
     public static void setUpAllTests() {
         Locale.setDefault(Locale.US);
-        // TODO : Users should be incremented up to 100,000
+        // Users could be incremented up to 100,000 for perf test purpose
         tourGuideFakeRepo.initializeInternalUsers(100);
     }
 
@@ -50,7 +50,6 @@ public class TourGuideServicePerformanceITest {
 
     @Test
     public void highVolumeCalculateRewards() {
-        // TODO : pourquoi ce test alors que rewardsService::calculateRewards déjà appelé par trackAllUsers() ?
         StopWatch stopWatch = new StopWatch();
         Attraction fakeAttraction = new Attraction("attractionName", "city", "state", 0, 0);
         Date fakeDate = new Date();
