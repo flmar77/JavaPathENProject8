@@ -10,11 +10,13 @@ import tourGuide.domain.model.NBAUser;
 import tourGuide.domain.model.NearByAttractions;
 import tourGuide.domain.model.User;
 import tourGuide.domain.model.UserLocations;
+import tourGuide.domain.model.UserPreferences;
 import tourGuide.domain.model.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -99,5 +101,15 @@ public class TourGuideService {
                     return userLocations;
                 })
                 .collect(Collectors.toList());
+    }
+
+    public User updateUserPreferences(String userName, UserPreferences userPreferences) {
+        User user = getUser(userName);
+
+        if (null == user) {
+            throw new NoSuchElementException();
+        }
+
+        return tourGuideFakeRepo.updateUserPreferences(user, userPreferences);
     }
 }
