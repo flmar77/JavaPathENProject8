@@ -35,6 +35,7 @@ public class RewardsService {
         this.proximityBuffer = proximityBuffer;
     }
 
+    // TODO : executor supply async
     public void calculateRewards(User user) {
         List<VisitedLocation> userLocations = user.getVisitedLocations();
         List<Attraction> attractions = gpsUtil.getAttractions();

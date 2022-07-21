@@ -9,11 +9,13 @@ import tourGuide.dal.TourGuideFakeRepo;
 import tourGuide.domain.model.NBAUser;
 import tourGuide.domain.model.NearByAttractions;
 import tourGuide.domain.model.User;
+import tourGuide.domain.model.UserLocations;
 import tourGuide.domain.model.UserReward;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -66,6 +68,7 @@ public class TourGuideService {
         return providers;
     }
 
+    // TODO : executor supply async
     public VisitedLocation trackUserLocation(User user) {
         VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
@@ -83,5 +86,18 @@ public class TourGuideService {
         nearbyAttractions.setAttractions(rewardsService.getFiveNearestAttractions(user, userLocation));
 
         return nearbyAttractions;
+    }
+
+    public List<UserLocations> getAllCurrentLocations() {
+        return getAllUsers().stream()
+                .map(user -> {
+                    UserLocations userLocations = new UserLocations();
+                    userLocations.setUserId(user.getUserId());
+                    userLocations.setLocations(user.getVisitedLocations().stream()
+                            .map(visitedLocation -> visitedLocation.location)
+                            .collect(Collectors.toList()));
+                    return userLocations;
+                })
+                .collect(Collectors.toList());
     }
 }
