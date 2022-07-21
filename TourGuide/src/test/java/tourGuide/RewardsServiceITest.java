@@ -50,7 +50,7 @@ public class RewardsServiceITest {
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
-    // Needs fixed - can throw ConcurrentModificationException
+    // TODO : c trop long :( !
     @Test
     public void nearAllAttractions() {
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
