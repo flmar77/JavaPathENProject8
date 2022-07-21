@@ -28,7 +28,7 @@ public class InitApplication implements CommandLineRunner {
     public void run(String... args) {
         if (testMode) {
             log.info("TestMode enabled");
-            tourGuideFakeRepo.initializeInternalUsers(100);
+            tourGuideFakeRepo.initializeInternalUsers(10);
         }
 
         executorService.submit(trackerDaemon);

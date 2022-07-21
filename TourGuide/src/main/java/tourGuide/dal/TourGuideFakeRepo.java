@@ -5,6 +5,7 @@ import gpsUtil.location.VisitedLocation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tourGuide.domain.model.User;
+import tourGuide.domain.model.UserPreferences;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -71,5 +72,10 @@ public class TourGuideFakeRepo {
     private Date getRandomTime() {
         LocalDateTime localDateTime = LocalDateTime.now().minusDays(new Random().nextInt(30));
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
+    }
+
+    public User updateUserPreferences(User user, UserPreferences userPreferences) {
+        user.setUserPreferences(userPreferences);
+        return internalUserMap.replace(user.getUserName(), user);
     }
 }

@@ -1,13 +1,13 @@
 package tourGuide;
 
 import gpsUtil.GpsUtil;
-import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
 import tourGuide.dal.TourGuideFakeRepo;
+import tourGuide.domain.model.NearByAttractions;
 import tourGuide.domain.model.User;
 import tourGuide.domain.service.RewardsService;
 import tourGuide.domain.service.TourGuideService;
@@ -71,15 +71,14 @@ public class TourGuideServiceITest {
         assertTrue(allUsers.contains(user2));
     }
 
-    @Ignore // TODO : Not yet implemented
     @Test
     public void getNearbyAttractions() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        tourGuideFakeRepo.addUser(user);
 
-        List<Attraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+        NearByAttractions nearByAttractions = tourGuideService.getNearByAttractions(user.getUserName());
 
-        assertEquals(5, attractions.size());
+        assertEquals(5, nearByAttractions.getAttractions().size());
     }
 
     @Ignore // TODO : Not yet implemented
