@@ -35,9 +35,7 @@ public class User {
     }
 
     public void addUserReward(UserReward userReward) {
-        if (userRewards.stream().allMatch(r -> false)) {
-            userRewards.add(userReward);
-        }
+        userRewards.add(userReward);
     }
 
     public VisitedLocation getLastVisitedLocation() {

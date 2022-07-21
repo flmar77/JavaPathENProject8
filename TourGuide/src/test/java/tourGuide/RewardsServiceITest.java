@@ -4,7 +4,6 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.Attraction;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
 import tourGuide.dal.TourGuideFakeRepo;
@@ -51,12 +50,11 @@ public class RewardsServiceITest {
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
-    @Ignore // Needs fixed - can throw ConcurrentModificationException
+    // Needs fixed - can throw ConcurrentModificationException
     @Test
     public void nearAllAttractions() {
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
-
-        TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService, tripPricer, tourGuideFakeRepo);
+        tourGuideFakeRepo.initializeInternalUsers(1);
 
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
         List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
