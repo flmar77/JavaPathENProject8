@@ -59,13 +59,13 @@ public class RewardsService {
             List<Attraction> attractions = gpsUtil.getAttractions();
 
             for (VisitedLocation visitedLocation : userLocations) {
-                for (Attraction attraction : attractions) {
+                attractions.parallelStream().forEach(attraction -> {
                     if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
                         if (nearAttraction(visitedLocation, attraction)) {
                             user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction.attractionId, user)));
                         }
                     }
-                }
+                });
             }
             return null;
         }, calculateRewardsThreadPool);
@@ -111,6 +111,7 @@ public class RewardsService {
                 })
                 .sorted()
                 .limit(5)
+                .parallel()
                 .peek(nbaAttraction -> nbaAttraction.setRewardPoints(getRewardPoints(nbaAttraction.getId(), user)))
                 .collect(Collectors.toList());
     }

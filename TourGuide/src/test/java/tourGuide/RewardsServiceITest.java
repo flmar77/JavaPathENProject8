@@ -52,7 +52,6 @@ public class RewardsServiceITest {
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
-    // TODO : c trop long :( !
     @Test
     public void nearAllAttractions() {
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
