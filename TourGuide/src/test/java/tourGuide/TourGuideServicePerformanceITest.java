@@ -59,6 +59,7 @@ public class TourGuideServicePerformanceITest {
 
         stopWatch.start();
         allUsers.forEach(rewardsService::calculateRewards);
+        rewardsService.calculateRewardsAwaitTerminationAfterShutdown();
         stopWatch.stop();
         long watchTime = stopWatch.getTime();
 

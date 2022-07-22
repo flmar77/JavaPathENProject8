@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -57,7 +58,11 @@ public class RewardsServiceITest {
         rewardsService.setProximityBuffer(Integer.MAX_VALUE);
         tourGuideFakeRepo.initializeInternalUsers(1);
 
-        rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
+        try {
+            rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0)).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
         List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
