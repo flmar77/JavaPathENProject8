@@ -17,6 +17,12 @@ import tripPricer.TripPricer;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,6 +32,7 @@ public class TourGuideService {
     private final RewardsService rewardsService;
     private final TripPricer tripPricer;
     private final TourGuideFakeRepo tourGuideFakeRepo;
+    private final ExecutorService trackUserLocationThreadPool = Executors.newFixedThreadPool(100);
 
     private static final String tripPricerApiKey = "test-server-api-key";
 
@@ -36,14 +43,30 @@ public class TourGuideService {
         this.tourGuideFakeRepo = tourGuideFakeRepo;
     }
 
+    public void trackUserLocationAwaitTerminationAfterShutdown() {
+        trackUserLocationThreadPool.shutdown();
+        try {
+            if (!trackUserLocationThreadPool.awaitTermination(5, TimeUnit.MINUTES)) {
+                trackUserLocationThreadPool.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            trackUserLocationThreadPool.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
+
     public List<UserReward> getUserRewards(User user) {
         return user.getUserRewards();
     }
 
     public VisitedLocation getUserLocation(User user) {
-        return (user.getVisitedLocations().size() > 0) ?
-                user.getLastVisitedLocation() :
-                trackUserLocation(user);
+        try {
+            return (user.getVisitedLocations().size() > 0) ?
+                    user.getLastVisitedLocation() :
+                    trackUserLocation(user).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public User getUser(String userName) {
@@ -70,12 +93,13 @@ public class TourGuideService {
         return providers;
     }
 
-    // TODO : executor supply async
-    public VisitedLocation trackUserLocation(User user) {
-        VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-        user.addToVisitedLocations(visitedLocation);
-        rewardsService.calculateRewards(user);
-        return visitedLocation;
+    public Future<VisitedLocation> trackUserLocation(User user) {
+        return CompletableFuture.supplyAsync(() -> {
+            VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
+            user.addToVisitedLocations(visitedLocation);
+            rewardsService.calculateRewards(user);
+            return visitedLocation;
+        }, trackUserLocationThreadPool);
     }
 
     public NearByAttractions getNearByAttractions(String userName) {

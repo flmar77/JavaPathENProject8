@@ -35,7 +35,7 @@ public class TourGuideServicePerformanceITest {
     public static void setUpAllTests() {
         Locale.setDefault(Locale.US);
         // Users could be incremented up to 100,000 for perf test purpose
-        tourGuideFakeRepo.initializeInternalUsers(100);
+        tourGuideFakeRepo.initializeInternalUsers(1000);
     }
 
     @Test
@@ -58,8 +58,7 @@ public class TourGuideServicePerformanceITest {
                 .forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), fakeAttraction, fakeDate)));
 
         stopWatch.start();
-        allUsers.parallelStream()
-                .forEach(rewardsService::calculateRewards);
+        allUsers.forEach(rewardsService::calculateRewards);
         stopWatch.stop();
         long watchTime = stopWatch.getTime();
 

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -42,7 +43,12 @@ public class TourGuideServiceITest {
     @Test
     public void trackUser() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        VisitedLocation visitedLocation;
+        try {
+            visitedLocation = tourGuideService.trackUserLocation(user).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
 
         assertEquals(user.getUserId(), visitedLocation.userId);
     }

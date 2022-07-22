@@ -25,7 +25,8 @@ public class Tracker {
         log.debug("Begin Tracker. Tracking " + users.size() + " users.");
 
         stopWatch.start();
-        users.parallelStream().forEach(tourGuideService::trackUserLocation);
+        users.forEach(tourGuideService::trackUserLocation);
+        tourGuideService.trackUserLocationAwaitTerminationAfterShutdown();
         stopWatch.stop();
 
         watchTime = stopWatch.getTime();

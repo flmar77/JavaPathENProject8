@@ -40,6 +40,7 @@ public class RewardsServiceITest {
         Attraction attraction = gpsUtil.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
         tourGuideService.trackUserLocation(user);
+        tourGuideService.trackUserLocationAwaitTerminationAfterShutdown();
         List<UserReward> userRewards = user.getUserRewards();
         assertEquals(1, userRewards.size());
     }
