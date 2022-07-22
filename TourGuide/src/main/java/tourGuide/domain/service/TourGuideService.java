@@ -32,7 +32,7 @@ public class TourGuideService {
     private final RewardsService rewardsService;
     private final TripPricer tripPricer;
     private final TourGuideFakeRepo tourGuideFakeRepo;
-    private final ExecutorService trackUserLocationThreadPool = Executors.newFixedThreadPool(100);
+    private ExecutorService trackUserLocationThreadPool = Executors.newFixedThreadPool(100);
 
     private static final String tripPricerApiKey = "test-server-api-key";
 
@@ -53,6 +53,7 @@ public class TourGuideService {
             trackUserLocationThreadPool.shutdownNow();
             Thread.currentThread().interrupt();
         }
+        trackUserLocationThreadPool = Executors.newFixedThreadPool(100);
     }
 
     public List<UserReward> getUserRewards(User user) {
@@ -100,6 +101,7 @@ public class TourGuideService {
             try {
                 rewardsService.calculateRewards(user).get();
             } catch (InterruptedException | ExecutionException e) {
+                log.error("trackUserLocation failed");
                 throw new RuntimeException(e);
             }
             return visitedLocation;

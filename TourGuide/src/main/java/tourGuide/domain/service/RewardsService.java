@@ -30,7 +30,7 @@ public class RewardsService {
     private int proximityBuffer = defaultProximityBuffer;
     private final GpsUtil gpsUtil;
     private final RewardCentral rewardsCentral;
-    private final ExecutorService calculateRewardsThreadPool = Executors.newFixedThreadPool(100);
+    private ExecutorService calculateRewardsThreadPool = Executors.newFixedThreadPool(100);
 
     public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
@@ -51,6 +51,7 @@ public class RewardsService {
             calculateRewardsThreadPool.shutdownNow();
             Thread.currentThread().interrupt();
         }
+        calculateRewardsThreadPool = Executors.newFixedThreadPool(100);
     }
 
     public Future<Void> calculateRewards(User user) {
