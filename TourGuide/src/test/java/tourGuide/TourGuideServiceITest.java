@@ -1,24 +1,30 @@
 package tourGuide;
 
 import gpsUtil.GpsUtil;
+import gpsUtil.location.Location;
 import gpsUtil.location.VisitedLocation;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import rewardCentral.RewardCentral;
 import tourGuide.dal.TourGuideFakeRepo;
 import tourGuide.domain.model.NearByAttractions;
 import tourGuide.domain.model.User;
+import tourGuide.domain.model.UserPreferences;
 import tourGuide.domain.service.RewardsService;
 import tourGuide.domain.service.TourGuideService;
 import tripPricer.Provider;
 import tripPricer.TripPricer;
 
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TourGuideServiceITest {
@@ -37,7 +43,12 @@ public class TourGuideServiceITest {
     @Test
     public void trackUser() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        VisitedLocation visitedLocation;
+        try {
+            visitedLocation = tourGuideService.trackUserLocation(user).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
 
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
@@ -81,13 +92,35 @@ public class TourGuideServiceITest {
         assertEquals(5, nearByAttractions.getAttractions().size());
     }
 
-    @Ignore // TODO : Not yet implemented
     @Test
     public void getTripDeals() {
         User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 
         List<Provider> providers = tourGuideService.getTripDeals(user);
 
-        assertEquals(10, providers.size());
+        assertEquals(5, providers.size());
+    }
+
+    @Test
+    public void getAllCurrentLocations() {
+        UUID userId = UUID.randomUUID();
+        User user = new User(userId, "getAllCurrentLocations", "000", "getAllCurrentLocations@tourGuide.com");
+        user.setVisitedLocations(Collections.singletonList(new VisitedLocation(userId, new Location(1, 2), new Date())));
+        tourGuideFakeRepo.addUser(user);
+
+        assertNotEquals(null, tourGuideService.getAllCurrentLocations().get(0));
+    }
+
+    @Test
+    public void updateUserPreferences() {
+        User user = new User(UUID.randomUUID(), "updateUserPreferences", "000", "updateUserPreferences@tourGuide.com");
+        tourGuideFakeRepo.addUser(user);
+
+        assertNotEquals(null, tourGuideService.updateUserPreferences(user.getUserName(), new UserPreferences()));
+    }
+
+    @Test(expected = NoSuchElementException.class)
+    public void updateUserPreferencesThrow() {
+        tourGuideService.updateUserPreferences("prout", new UserPreferences());
     }
 }

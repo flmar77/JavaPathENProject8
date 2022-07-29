@@ -13,6 +13,11 @@ import tourGuide.domain.model.UserReward;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,6 +30,7 @@ public class RewardsService {
     private int proximityBuffer = defaultProximityBuffer;
     private final GpsUtil gpsUtil;
     private final RewardCentral rewardsCentral;
+    private ExecutorService calculateRewardsThreadPool = Executors.newFixedThreadPool(100);
 
     public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
         this.gpsUtil = gpsUtil;
@@ -35,20 +41,35 @@ public class RewardsService {
         this.proximityBuffer = proximityBuffer;
     }
 
-    // TODO : executor supply async
-    public void calculateRewards(User user) {
-        List<VisitedLocation> userLocations = user.getVisitedLocations();
-        List<Attraction> attractions = gpsUtil.getAttractions();
-
-        for (VisitedLocation visitedLocation : userLocations) {
-            for (Attraction attraction : attractions) {
-                if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
-                    if (nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction.attractionId, user)));
-                    }
-                }
+    public void calculateRewardsAwaitTerminationAfterShutdown() {
+        calculateRewardsThreadPool.shutdown();
+        try {
+            if (!calculateRewardsThreadPool.awaitTermination(5, TimeUnit.MINUTES)) {
+                calculateRewardsThreadPool.shutdownNow();
             }
+        } catch (InterruptedException ex) {
+            calculateRewardsThreadPool.shutdownNow();
+            Thread.currentThread().interrupt();
         }
+        calculateRewardsThreadPool = Executors.newFixedThreadPool(100);
+    }
+
+    public Future<Void> calculateRewards(User user) {
+        return CompletableFuture.supplyAsync(() -> {
+            List<VisitedLocation> userLocations = user.getVisitedLocations();
+            List<Attraction> attractions = gpsUtil.getAttractions();
+
+            for (VisitedLocation visitedLocation : userLocations) {
+                attractions.parallelStream().forEach(attraction -> {
+                    if (user.getUserRewards().stream().noneMatch(r -> r.attraction.attractionName.equals(attraction.attractionName))) {
+                        if (nearAttraction(visitedLocation, attraction)) {
+                            user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction.attractionId, user)));
+                        }
+                    }
+                });
+            }
+            return null;
+        }, calculateRewardsThreadPool);
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
@@ -91,6 +112,7 @@ public class RewardsService {
                 })
                 .sorted()
                 .limit(5)
+                .parallel()
                 .peek(nbaAttraction -> nbaAttraction.setRewardPoints(getRewardPoints(nbaAttraction.getId(), user)))
                 .collect(Collectors.toList());
     }
